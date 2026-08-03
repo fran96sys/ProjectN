@@ -1,2 +1,29 @@
-import{$,notify,validateImage}from'../utils/helpers.js';import{currentUser,updateCurrentUser}from'../services/auth-service.js';
-export const initProfile=()=>{const user=currentUser();if(!user){location.href='login.html';return}$('#profile-view').innerHTML=`<div class="profile-card"><div class="profile-cover"></div><div class="profile-content"><img id="profile-avatar" class="profile-avatar" src="${user.avatar}" alt="Foto de perfil"><h1 class="h3 mt-2">${user.name}</h1><p class="text-muted">${user.email} · ${user.role==='admin'?'Administrador':'Miembro de la comunidad'}</p></div></div>`;$('#profile-form').innerHTML=`<div class="panel p-4"><h2 class="h4 fw-bold">Editar perfil</h2><form id="edit-profile" class="row g-3 mt-1"><div class="col-md-6"><label class="form-label">Nombre completo</label><input class="form-control" name="name" required value="${user.name}"></div><div class="col-md-6"><label class="form-label">Comunidad</label><input class="form-control" name="community" required value="${user.community}"></div><div class="col-12"><label class="form-label">Biografía</label><textarea class="form-control" name="bio" rows="3">${user.bio||''}</textarea></div><div class="col-12"><label class="form-label">Cambiar fotografía</label><input id="avatar-input" class="form-control" type="file" accept="image/*"></div><div class="col-12 text-end"><button class="btn btn-primary">Guardar perfil</button></div></form></div>`;let avatar=user.avatar;$('#avatar-input').onchange=async e=>{try{avatar=await validateImage(e.target.files[0]);$('#profile-avatar').src=avatar}catch(err){window.Swal.fire('Imagen no válida',err.message,'error')}};$('#edit-profile').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));updateCurrentUser({...data,avatar});notify('Perfil actualizado.');initProfile()}};
+import { $, notify, validateImage } from "../utils/helpers.js";
+import { currentUser, updateCurrentUser } from "../services/auth-service.js";
+export const initProfile = () => {
+  const user = currentUser();
+  if (!user) {
+    location.href = "login.html";
+    return;
+  }
+  $("#profile-view").innerHTML =
+    `<div class="profile-card"><div class="profile-cover"></div><div class="profile-content"><img id="profile-avatar" class="profile-avatar" src="${user.avatar}" alt="Foto de perfil"><h1 class="h3 mt-2">${user.name}</h1><p class="text-muted">${user.email} · ${user.role === "admin" ? "Administrador" : "Miembro de la comunidad"}</p></div></div>`;
+  $("#profile-form").innerHTML =
+    `<div class="panel p-4"><h2 class="h4 fw-bold">Editar perfil</h2><form id="edit-profile" class="row g-3 mt-1"><div class="col-md-6"><label class="form-label">Nombre completo</label><input class="form-control" name="name" required value="${user.name}"></div><div class="col-md-6"><label class="form-label">Comunidad</label><input class="form-control" name="community" required value="${user.community}"></div><div class="col-12"><label class="form-label">Biografía</label><textarea class="form-control" name="bio" rows="3">${user.bio || ""}</textarea></div><div class="col-12"><label class="form-label">Cambiar fotografía</label><input id="avatar-input" class="form-control" type="file" accept="image/*"></div><div class="col-12 text-end"><button class="btn btn-primary">Guardar perfil</button></div></form></div>`;
+  let avatar = user.avatar;
+  $("#avatar-input").onchange = async (e) => {
+    try {
+      avatar = await validateImage(e.target.files[0]);
+      $("#profile-avatar").src = avatar;
+    } catch (err) {
+      window.Swal.fire("Imagen no válida", err.message, "error");
+    }
+  };
+  $("#edit-profile").onsubmit = (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.currentTarget));
+    updateCurrentUser({ ...data, avatar });
+    notify("Perfil actualizado.");
+    initProfile();
+  };
+};

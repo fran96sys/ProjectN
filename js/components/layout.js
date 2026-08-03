@@ -1,5 +1,33 @@
-import{currentUser,logout,isAdmin}from'../services/auth-service.js';import{$}from'../utils/helpers.js';
-const navLink=(href,text,icon='')=>`<li class="nav-item"><a class="nav-link" href="${href}">${icon?`<i class="bi bi-${icon} me-1"></i>`:''}${text}</a></li>`;
-export const renderLayout=()=>{const user=currentUser();$('#site-header').innerHTML=`<nav class="navbar navbar-expand-lg site-nav"><div class="container"><a class="navbar-brand brand d-flex align-items-center gap-2" href="index.html"><i class="bi bi-flower1"></i><span>Natural App <small class="d-block fw-normal">Villa Abecia</small></span></a><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><i class="bi bi-list"></i></button><div class="collapse navbar-collapse" id="mainNav"><ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">${navLink('index.html','Explorar','search')}${user?`${navLink('agregar.html','Agregar','plus-circle')}${navLink('mis-plantas.html','Mis plantas','journal-text')}${navLink('favoritos.html','Favoritas','heart')}${isAdmin()?navLink('admin.html','Administración','shield-check'):''}<li class="nav-item"><a class="nav-link user-menu" href="perfil.html"><img class="avatar" src="${user.avatar}" alt="" />${user.name.split(' ')[0]}</a></li><li class="nav-item"><button id="logout-button" class="nav-link border-0 bg-transparent" type="button">Salir</button></li>`:`${navLink('login.html','Ingresar','box-arrow-in-right')}<li class="nav-item"><a class="btn btn-primary ms-lg-2" href="register.html">Crear cuenta</a></li>`}<li class="nav-item ms-lg-2"><button id="theme-toggle" class="theme-button" type="button" aria-label="Cambiar tema"><i class="bi bi-moon-stars"></i></button></li></ul></div></div></nav>`;$('#site-footer').innerHTML=`<div class="site-footer"><div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3"><div><div class="brand text-white"><i class="bi bi-flower1 me-2"></i>Natural App Villa Abecia</div><p class="mb-0 mt-2">Proyecto de Grado BTH · Chuquisaca, Bolivia</p></div><p class="mb-0">Conocimiento comunitario para el bienestar responsable.</p></div></div>`;$('#logout-button')?.addEventListener('click',()=>{logout();location.href='index.html'});$('#theme-toggle')?.addEventListener('click',toggleTheme);};
-export const toggleTheme=()=>{const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';const settings=JSON.parse(localStorage.getItem('naturalApp.settings')||'{}');localStorage.setItem('naturalApp.settings',JSON.stringify({...settings,theme:dark?'dark':'light'}));};
-export const restoreTheme=()=>{const theme=JSON.parse(localStorage.getItem('naturalApp.settings')||'{}').theme||'light';document.documentElement.dataset.theme=theme};
+import { currentUser, logout, isAdmin } from "../services/auth-service.js";
+import { $ } from "../utils/helpers.js";
+const navLink = (href, text, icon = "") =>
+  `<li class="nav-item"><a class="nav-link" href="${href}">${icon ? `<i class="bi bi-${icon} me-1"></i>` : ""}${text}</a></li>`;
+export const renderLayout = () => {
+  const user = currentUser();
+  $("#site-header").innerHTML =
+    `<nav class="navbar navbar-expand-lg site-nav"><div class="container"><a class="navbar-brand brand d-flex align-items-center gap-2" href="index.html"><i class="bi bi-flower1"></i><span>Natural App <small class="d-block fw-normal">Villa Abecia</small></span></a><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><i class="bi bi-list"></i></button><div class="collapse navbar-collapse" id="mainNav"><ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">${navLink("index.html", "Explorar", "search")}${user ? `${navLink("agregar.html", "Agregar", "plus-circle")}${navLink("mis-plantas.html", "Mis plantas", "journal-text")}${navLink("favoritos.html", "Favoritas", "heart")}${isAdmin() ? navLink("admin.html", "Administración", "shield-check") : ""}<li class="nav-item"><a class="nav-link user-menu" href="perfil.html"><img class="avatar" src="${user.avatar}" alt="" />${user.name.split(" ")[0]}</a></li><li class="nav-item"><button id="logout-button" class="nav-link border-0 bg-transparent" type="button">Salir</button></li>` : `${navLink("login.html", "Ingresar", "box-arrow-in-right")}<li class="nav-item"><a class="btn btn-primary ms-lg-2" href="register.html">Crear cuenta</a></li>`}<li class="nav-item ms-lg-2"><button id="theme-toggle" class="theme-button" type="button" aria-label="Cambiar tema"><i class="bi bi-moon-stars"></i></button></li></ul></div></div></nav>`;
+  $("#site-footer").innerHTML =
+    `<div class="site-footer"><div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3"><div><div class="brand text-white"><i class="bi bi-flower1 me-2"></i>Natural App Villa Abecia</div><p class="mb-0 mt-2">Proyecto de Grado BTH · Chuquisaca, Bolivia</p></div><p class="mb-0">Conocimiento comunitario para el bienestar responsable.</p></div></div>`;
+  $("#logout-button")?.addEventListener("click", () => {
+    logout();
+    location.href = "index.html";
+  });
+  $("#theme-toggle")?.addEventListener("click", toggleTheme);
+};
+export const toggleTheme = () => {
+  const dark = document.documentElement.dataset.theme !== "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  const settings = JSON.parse(
+    localStorage.getItem("naturalApp.settings") || "{}",
+  );
+  localStorage.setItem(
+    "naturalApp.settings",
+    JSON.stringify({ ...settings, theme: dark ? "dark" : "light" }),
+  );
+};
+export const restoreTheme = () => {
+  const theme =
+    JSON.parse(localStorage.getItem("naturalApp.settings") || "{}").theme ||
+    "light";
+  document.documentElement.dataset.theme = theme;
+};

@@ -1,4 +1,124 @@
-import{$,escapeHTML,confirm,notify}from'../utils/helpers.js';import{currentUser,users,updateUser,deleteUser}from'../services/auth-service.js';import{plants,comments,deletePlant,deleteComment,author}from'../services/data-service.js';
-const guard=()=>{if(currentUser()?.role!=='admin'){location.href='index.html';return false}return true};
-export const initAdmin=()=>{if(!guard())return;$('#admin-root').innerHTML=`<div class="container section-space"><div class="mb-4"><span class="eyebrow"><i class="bi bi-shield-check"></i> Administración</span><h1 class="mt-2 fw-bold">Panel de control</h1></div><div class="admin-layout"><aside class="admin-sidebar panel"><button class="active" data-section="dashboard"><i class="bi bi-grid me-2"></i>Resumen</button><button data-section="users"><i class="bi bi-people me-2"></i>Usuarios</button><button data-section="plants"><i class="bi bi-flower1 me-2"></i>Plantas</button><button data-section="comments"><i class="bi bi-chat-square-text me-2"></i>Comentarios</button></aside><section id="admin-content"></section></div></div>`;document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-section]').forEach(x=>x.classList.remove('active'));b.classList.add('active');render(b.dataset.section)});render('dashboard')};
-function render(section){const root=$('#admin-content');if(section==='dashboard'){root.innerHTML=`<div class="row g-3"><div class="col-sm-6 col-xl-3"><div class="admin-card stat"><div class="text-muted">Usuarios</div><div class="stat__number">${users().length}</div></div></div><div class="col-sm-6 col-xl-3"><div class="admin-card stat"><div class="text-muted">Plantas</div><div class="stat__number">${plants().length}</div></div></div><div class="col-sm-6 col-xl-3"><div class="admin-card stat"><div class="text-muted">Comentarios</div><div class="stat__number">${comments().length}</div></div></div><div class="col-sm-6 col-xl-3"><div class="admin-card stat"><div class="text-muted">Favoritas</div><div class="stat__number">${JSON.parse(localStorage.getItem('naturalApp.favorites')||'[]').length}</div></div></div></div><div class="panel p-4 mt-4"><h2 class="h5 fw-bold">Últimas publicaciones</h2>${plants().slice(0,5).map(p=>`<div class="d-flex justify-content-between border-bottom py-2"><span>${escapeHTML(p.commonName)}</span><span class="text-muted">${escapeHTML(author(p.authorId).name)}</span></div>`).join('')||'<p class="text-muted mb-0">Sin publicaciones.</p>'}</div>`;return}if(section==='users'){root.innerHTML=`<div class="panel p-4"><h2 class="h5 fw-bold">Usuarios registrados</h2><div class="table-wrap"><table class="table align-middle"><thead><tr><th>Persona</th><th>Comunidad</th><th>Rol</th><th></th></tr></thead><tbody>${users().map(u=>`<tr><td><img src="${u.avatar}" alt=""> <strong>${escapeHTML(u.name)}</strong><small class="d-block text-muted">${escapeHTML(u.email)}</small></td><td>${escapeHTML(u.community)}</td><td><span class="badge text-bg-${u.role==='admin'?'success':'secondary'}">${u.role}</span></td><td><button class="btn btn-sm btn-light edit-user" data-id="${u.id}">Editar</button> ${u.id!==currentUser().id?`<button class="btn btn-sm btn-outline-danger remove-user" data-id="${u.id}">Eliminar</button>`:''}</td></tr>`).join('')}</tbody></table></div></div>`;document.querySelectorAll('.edit-user').forEach(b=>b.onclick=async()=>{const u=users().find(x=>x.id===b.dataset.id);const r=await window.Swal.fire({title:'Editar usuario',html:`<input id="swal-name" class="swal2-input" value="${escapeHTML(u.name)}"><input id="swal-community" class="swal2-input" value="${escapeHTML(u.community)}">`,preConfirm:()=>({name:document.querySelector('#swal-name').value,community:document.querySelector('#swal-community').value})});if(r.isConfirmed){updateUser(u.id,r.value);notify('Usuario actualizado.');render('users')}});document.querySelectorAll('.remove-user').forEach(b=>b.onclick=async()=>{if(await confirm('¿Eliminar usuario?')){deleteUser(b.dataset.id);render('users')}});return}if(section==='plants'){root.innerHTML=`<div class="panel p-4"><h2 class="h5 fw-bold">Plantas registradas</h2><div class="table-wrap"><table class="table align-middle"><thead><tr><th>Planta</th><th>Autor</th><th>Comunidad</th><th></th></tr></thead><tbody>${plants().map(p=>`<tr><td>${escapeHTML(p.commonName)}<small class="d-block text-muted">${escapeHTML(p.category)}</small></td><td>${escapeHTML(author(p.authorId).name)}</td><td>${escapeHTML(p.community)}</td><td><a class="btn btn-sm btn-light" href="agregar.html?id=${p.id}">Editar</a> <button class="btn btn-sm btn-outline-danger remove-plant" data-id="${p.id}">Eliminar</button></td></tr>`).join('')}</tbody></table></div></div>`;document.querySelectorAll('.remove-plant').forEach(b=>b.onclick=async()=>{if(await confirm('¿Eliminar planta?')){deletePlant(b.dataset.id);render('plants')}});return}root.innerHTML=`<div class="panel p-4"><h2 class="h5 fw-bold">Moderación de comentarios</h2>${comments().map(c=>`<div class="comment"><img class="avatar" src="${author(c.userId).avatar}" alt=""><div class="comment__content"><strong>${escapeHTML(author(c.userId).name)}</strong><p class="mb-1">${escapeHTML(c.content)}</p><small class="text-muted">En: ${escapeHTML(plants().find(p=>p.id===c.plantId)?.commonName||'Planta eliminada')}</small></div><button class="btn btn-sm btn-outline-danger remove-comment" data-id="${c.id}">Eliminar</button></div>`).join('')||'<p class="text-muted">No hay comentarios.</p>'}</div>`;document.querySelectorAll('.remove-comment').forEach(b=>b.onclick=async()=>{if(await confirm('¿Eliminar comentario?')){deleteComment(b.dataset.id);render('comments')}})};
+import { $, escapeHTML, confirm, notify } from "../utils/helpers.js";
+import {
+  currentUser,
+  users,
+  updateUser,
+  deleteUser,
+} from "../services/auth-service.js";
+import {
+  plants,
+  comments,
+  deletePlant,
+  deleteComment,
+  author,
+} from "../services/data-service.js";
+const guard = () => {
+  if (currentUser()?.role !== "admin") {
+    location.href = "index.html";
+    return false;
+  }
+  return true;
+};
+export const initAdmin = () => {
+  if (!guard()) return;
+  $("#admin-root").innerHTML =
+    `<div class="container section-space"><div class="mb-4"><span class="eyebrow"><i class="bi bi-shield-check"></i> Administración</span><h1 class="mt-2 fw-bold">Panel de control</h1></div><div class="admin-layout"><aside class="admin-sidebar panel"><button class="active" data-section="dashboard"><i class="bi bi-grid me-2"></i>Resumen</button><button data-section="users"><i class="bi bi-people me-2"></i>Usuarios</button><button data-section="plants"><i class="bi bi-flower1 me-2"></i>Plantas</button><button data-section="comments"><i class="bi bi-chat-square-text me-2"></i>Comentarios</button></aside><section id="admin-content"></section></div></div>`;
+  document.querySelectorAll("[data-section]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        document
+          .querySelectorAll("[data-section]")
+          .forEach((x) => x.classList.remove("active"));
+        b.classList.add("active");
+        render(b.dataset.section);
+      }),
+  );
+  render("dashboard");
+};
+function render(section) {
+  const root = $("#admin-content");
+  if (section === "dashboard") {
+    root.innerHTML = `<div class="row g-3"><div class="col-sm-6 col-xl-3"><div class="admin-card stat"><div class="text-muted">Usuarios</div><div class="stat__number">${users().length}</div></div></div><div class="col-sm-6 col-xl-3"><div class="admin-card stat"><div class="text-muted">Plantas</div><div class="stat__number">${plants().length}</div></div></div><div class="col-sm-6 col-xl-3"><div class="admin-card stat"><div class="text-muted">Comentarios</div><div class="stat__number">${comments().length}</div></div></div><div class="col-sm-6 col-xl-3"><div class="admin-card stat"><div class="text-muted">Favoritas</div><div class="stat__number">${JSON.parse(localStorage.getItem("naturalApp.favorites") || "[]").length}</div></div></div></div><div class="panel p-4 mt-4"><h2 class="h5 fw-bold">Últimas publicaciones</h2>${
+      plants()
+        .slice(0, 5)
+        .map(
+          (p) =>
+            `<div class="d-flex justify-content-between border-bottom py-2"><span>${escapeHTML(p.commonName)}</span><span class="text-muted">${escapeHTML(author(p.authorId).name)}</span></div>`,
+        )
+        .join("") || '<p class="text-muted mb-0">Sin publicaciones.</p>'
+    }</div>`;
+    return;
+  }
+  if (section === "users") {
+    root.innerHTML = `<div class="panel p-4"><h2 class="h5 fw-bold">Usuarios registrados</h2><div class="table-wrap"><table class="table align-middle"><thead><tr><th>Persona</th><th>Comunidad</th><th>Rol</th><th></th></tr></thead><tbody>${users()
+      .map(
+        (u) =>
+          `<tr><td><img src="${u.avatar}" alt=""> <strong>${escapeHTML(u.name)}</strong><small class="d-block text-muted">${escapeHTML(u.email)}</small></td><td>${escapeHTML(u.community)}</td><td><span class="badge text-bg-${u.role === "admin" ? "success" : "secondary"}">${u.role}</span></td><td><button class="btn btn-sm btn-light edit-user" data-id="${u.id}">Editar</button> ${u.id !== currentUser().id ? `<button class="btn btn-sm btn-outline-danger remove-user" data-id="${u.id}">Eliminar</button>` : ""}</td></tr>`,
+      )
+      .join("")}</tbody></table></div></div>`;
+    document.querySelectorAll(".edit-user").forEach(
+      (b) =>
+        (b.onclick = async () => {
+          const u = users().find((x) => x.id === b.dataset.id);
+          const r = await window.Swal.fire({
+            title: "Editar usuario",
+            html: `<input id="swal-name" class="swal2-input" value="${escapeHTML(u.name)}"><input id="swal-community" class="swal2-input" value="${escapeHTML(u.community)}">`,
+            preConfirm: () => ({
+              name: document.querySelector("#swal-name").value,
+              community: document.querySelector("#swal-community").value,
+            }),
+          });
+          if (r.isConfirmed) {
+            updateUser(u.id, r.value);
+            notify("Usuario actualizado.");
+            render("users");
+          }
+        }),
+    );
+    document.querySelectorAll(".remove-user").forEach(
+      (b) =>
+        (b.onclick = async () => {
+          if (await confirm("¿Eliminar usuario?")) {
+            deleteUser(b.dataset.id);
+            render("users");
+          }
+        }),
+    );
+    return;
+  }
+  if (section === "plants") {
+    root.innerHTML = `<div class="panel p-4"><h2 class="h5 fw-bold">Plantas registradas</h2><div class="table-wrap"><table class="table align-middle"><thead><tr><th>Planta</th><th>Autor</th><th>Comunidad</th><th></th></tr></thead><tbody>${plants()
+      .map(
+        (p) =>
+          `<tr><td>${escapeHTML(p.commonName)}<small class="d-block text-muted">${escapeHTML(p.category)}</small></td><td>${escapeHTML(author(p.authorId).name)}</td><td>${escapeHTML(p.community)}</td><td><a class="btn btn-sm btn-light" href="agregar.html?id=${p.id}">Editar</a> <button class="btn btn-sm btn-outline-danger remove-plant" data-id="${p.id}">Eliminar</button></td></tr>`,
+      )
+      .join("")}</tbody></table></div></div>`;
+    document.querySelectorAll(".remove-plant").forEach(
+      (b) =>
+        (b.onclick = async () => {
+          if (await confirm("¿Eliminar planta?")) {
+            deletePlant(b.dataset.id);
+            render("plants");
+          }
+        }),
+    );
+    return;
+  }
+  root.innerHTML = `<div class="panel p-4"><h2 class="h5 fw-bold">Moderación de comentarios</h2>${
+    comments()
+      .map(
+        (c) =>
+          `<div class="comment"><img class="avatar" src="${author(c.userId).avatar}" alt=""><div class="comment__content"><strong>${escapeHTML(author(c.userId).name)}</strong><p class="mb-1">${escapeHTML(c.content)}</p><small class="text-muted">En: ${escapeHTML(plants().find((p) => p.id === c.plantId)?.commonName || "Planta eliminada")}</small></div><button class="btn btn-sm btn-outline-danger remove-comment" data-id="${c.id}">Eliminar</button></div>`,
+      )
+      .join("") || '<p class="text-muted">No hay comentarios.</p>'
+  }</div>`;
+  document.querySelectorAll(".remove-comment").forEach(
+    (b) =>
+      (b.onclick = async () => {
+        if (await confirm("¿Eliminar comentario?")) {
+          deleteComment(b.dataset.id);
+          render("comments");
+        }
+      }),
+  );
+}

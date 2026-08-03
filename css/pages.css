@@ -1,1 +1,45 @@
-.category-pills{display:flex;gap:.5rem;flex-wrap:wrap}.category-pill{border:1px solid var(--line);background:var(--paper);padding:.45rem .75rem;border-radius:99px;font-size:.8rem}.category-pill:hover{border-color:var(--green);color:var(--green)}.image-preview{width:100%;max-height:250px;object-fit:cover;border-radius:16px;border:1px dashed var(--line);background:var(--cream)}.required::after{content:' *';color:var(--danger)}.plant-actions{display:flex;gap:.5rem;flex-wrap:wrap}.medical-note{background:#fff7de;border-left:4px solid #e6af34;border-radius:8px;padding:.8rem;color:#5e4a19;font-size:.84rem}.pagination-info{font-size:.82rem;color:var(--muted)}
+.category-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.category-pill {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 0.45rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+}
+.category-pill:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+.image-preview {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px dashed var(--line);
+  background: var(--cream);
+}
+.required::after {
+  content: " *";
+  color: var(--danger);
+}
+.plant-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.medical-note {
+  background: #fff7de;
+  border-left: 4px solid #e6af34;
+  border-radius: 8px;
+  padding: 0.8rem;
+  color: #5e4a19;
+  font-size: 0.84rem;
+}
+.pagination-info {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
