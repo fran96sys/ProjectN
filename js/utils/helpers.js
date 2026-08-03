@@ -1,0 +1,12 @@
+export const $=(selector,parent=document)=>parent.querySelector(selector);
+export const $$=(selector,parent=document)=>[...parent.querySelectorAll(selector)];
+export const id=prefix=>`${prefix}_${crypto.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2)}`;
+export const now=()=>new Date().toISOString();
+export const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+export const date=value=>new Intl.DateTimeFormat('es-BO',{dateStyle:'medium'}).format(new Date(value));
+export const truncate=(value,n=115)=>value?.length>n?`${value.slice(0,n).trim()}…`:value||'';
+export const notify=(title,icon='success')=>window.Swal?.fire({toast:true,position:'top-end',showConfirmButton:false,timer:2800,timerProgressBar:true,title,icon});
+export const confirm=async(title,text='Esta acción no se puede deshacer.')=>{const r=await window.Swal?.fire({title,text,icon:'warning',showCancelButton:true,confirmButtonText:'Sí, continuar',cancelButtonText:'Cancelar',confirmButtonColor:'#c53935'});return r?.isConfirmed};
+export const setLoading=visible=>$('#app-loader')?.classList.toggle('is-hidden',!visible);
+export const fileToDataUrl=file=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)});
+export const validateImage=async file=>{if(!file)return null;if(!file.type.startsWith('image/'))throw new Error('Selecciona un archivo de imagen válido.');if(file.size>850000)throw new Error('La imagen debe pesar como máximo 850 KB.');return fileToDataUrl(file)};

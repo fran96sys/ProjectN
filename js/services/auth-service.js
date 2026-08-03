@@ -1,0 +1,12 @@
+import{KEYS}from'../config.js';import{read,write,remove}from'../storage/local-storage.js';import{id,now}from'../utils/helpers.js';
+const digest=async value=>{const data=new TextEncoder().encode(value);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('')};
+const salt=()=>crypto.getRandomValues(new Uint32Array(4)).join('-');
+export const users=()=>read(KEYS.users,[]);
+export const currentUser=()=>{const session=read(KEYS.session,null);return session?users().find(u=>u.id===session.userId)||null:null};
+export const isAdmin=()=>currentUser()?.role==='admin';
+export const login=async(email,password)=>{const user=users().find(u=>u.email===email.trim().toLowerCase());if(!user||await digest(`${user.passwordSalt}:${password}`)!==user.passwordHash)throw new Error('Correo o contraseña incorrectos.');write(KEYS.session,{userId:user.id,startedAt:now()});return user};
+export const register=async({name,email,password,community})=>{email=email.trim().toLowerCase();if(users().some(u=>u.email===email))throw new Error('Ya existe una cuenta con este correo.');const passwordSalt=salt();const user={id:id('usr'),name:name.trim(),email,passwordSalt,passwordHash:await digest(`${passwordSalt}:${password}`),role:'user',avatar:'img/default-avatar.svg',bio:'',community:community.trim()||'Villa Abecia',createdAt:now(),updatedAt:now()};write(KEYS.users,[...users(),user]);write(KEYS.session,{userId:user.id,startedAt:now()});return user};
+export const logout=()=>remove(KEYS.session);
+export const updateCurrentUser=changes=>{const me=currentUser();if(!me)throw new Error('Debes iniciar sesión.');const list=users().map(u=>u.id===me.id?{...u,...changes,updatedAt:now()}:u);write(KEYS.users,list);return list.find(u=>u.id===me.id)};
+export const updateUser=(userId,changes)=>{const list=users().map(u=>u.id===userId?{...u,...changes,updatedAt:now()}:u);write(KEYS.users,list);return list.find(u=>u.id===userId)};
+export const deleteUser=userId=>{if(currentUser()?.id===userId)throw new Error('No puedes eliminar tu propia cuenta.');write(KEYS.users,users().filter(u=>u.id!==userId));};
